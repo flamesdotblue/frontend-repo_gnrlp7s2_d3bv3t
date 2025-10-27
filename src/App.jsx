@@ -1,28 +1,57 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react';
+import Header from './components/Header';
+import Hero from './components/Hero';
+import Chat from './components/Chat';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [mode, setMode] = useState('landing');
+  const [theme, setTheme] = useState('light');
+  const [initialQuery, setInitialQuery] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark' || saved === 'light') setTheme(saved);
+    }
+  }, []);
+
+  const handleQuery = (q) => {
+    setInitialQuery(q);
+    setMode('chat');
+  };
+
+  const handleQuickPick = (label) => {
+    const map = {
+      Me: 'Tell me about you',
+      Projects: 'Show my projects',
+      Skills: 'What are your skills?',
+      Contact: 'How can I contact you?',
+    };
+    handleQuery(map[label] || label);
+  };
+
+  const handleResume = () => {
+    // Open email compose or link to GitHub as a placeholder resume source
+    window.open('https://github.com/Raghavv1206', '_blank');
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Vibe Coding Platform
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Your AI-powered development environment
-        </p>
-        <div className="text-center">
-          <button
-            onClick={() => setCount(count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Count is {count}
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-white dark:bg-neutral-950">
+      <Header onResume={handleResume} theme={theme} setTheme={setTheme} />
+      {mode === 'landing' ? (
+        <>
+          <Hero onSubmitQuery={handleQuery} onQuickPick={handleQuickPick} />
+          <div className="max-w-5xl mx-auto px-4 pb-16">
+            <p className="text-center text-sm text-neutral-500 dark:text-neutral-400">
+              Tip: Click a card or start typing to begin the conversation.
+            </p>
+          </div>
+        </>
+      ) : (
+        <Chat initialQuery={initialQuery} />
+      )}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
